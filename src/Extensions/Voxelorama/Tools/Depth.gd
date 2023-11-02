@@ -1,17 +1,13 @@
-extends Node
+extends "res://src/Tools/Draw.gd"
 
-var is_moving = false
-var kname: String
-var tool_slot = null  # Tools.Slot
-var cursor_text := ""
 
-var _cursor := Vector2.INF
 var _depth_array := []  # 2D array
 var _depth := 1.0
 var _canvas_depth: PackedScene = preload("res://src/Extensions/Voxelorama/Tools/CanvasDepth.tscn")
 var _canvas_depth_node: Node2D
 
 var _canvas: Node2D
+var _draw_points := []
 
 func _ready() -> void:
 	kname = name.replace(" ", "_").to_lower()
@@ -48,8 +44,8 @@ func set_config(config: Dictionary) -> void:
 
 
 func update_config() -> void:
-	$HBoxContainer/DepthHSlider.value = _depth
-	$HBoxContainer/DepthSpinBox.value = _depth
+	.update_config()
+	$Depth.value = _depth
 
 
 func draw_start(position: Vector2) -> void:
@@ -93,12 +89,12 @@ func cursor_move(position: Vector2) -> void:
 	_cursor = position
 
 
-func draw_indicator(left: bool) -> void:
-	var rect := Rect2(_cursor, Vector2.ONE)
-	if _canvas:
-		var global: Node = ExtensionsApi.general.get_global()
-		var color: Color = global.left_tool_color if left else global.right_tool_color
-		_canvas.indicators.draw_rect(rect, color, false)
+#func draw_indicator(left: bool) -> void:
+#	var rect := Rect2(_cursor, Vector2.ONE)
+#	if _canvas:
+#		var global: Node = ExtensionsApi.general.get_global()
+#		var color: Color = global.left_tool_color if left else global.right_tool_color
+#		_canvas.indicators.draw_rect(rect, color, false)
 
 
 func draw_preview() -> void:
@@ -113,12 +109,16 @@ func _initialize_array(image: Image) -> void:
 
 
 func _update_array(cel: Reference, position: Vector2) -> void:
-	_depth_array[position.x][position.y] = _depth
+	_prepare_tool()
+	var coords_to_draw := _draw_tool(position)
+	for coord in coords_to_draw:
+		if ExtensionsApi.project.get_current_project().can_pixel_get_drawn(coord):
+			_depth_array[coord.x][coord.y] = _depth
 	cel.set_meta("VoxelDepth", _depth_array)
 	_canvas_depth_node.update()
 
 
-func _on_DepthHSlider_value_changed(value: float) -> void:
+func _on_Depth_value_changed(value: float) -> void:
 	_depth = value
 	update_config()
 	save_config()
@@ -129,3 +129,32 @@ func _exit_tree() -> void:
 		_canvas_depth_node.request_deletion()
 		if is_moving:
 			draw_end(_canvas.current_pixel.floor())
+
+
+# overrides
+# Make sure to always have invoked _prepare_tool() before this. This computes the coordinates to be
+# drawn if it can (except for the generic brush, when it's actually drawing them)
+func _draw_tool(position: Vector2) -> PoolVector2Array:
+	_draw_points.clear()
+	match _brush.type:
+		Brushes.PIXEL:
+			return _compute_draw_tool_pixel(position)
+		Brushes.CIRCLE:
+			return _compute_draw_tool_circle(position, false)
+		Brushes.FILLED_CIRCLE:
+			return _compute_draw_tool_circle(position, true)
+		_:
+			return _compute_draw_tool_brush(position)
+
+
+func _compute_draw_tool_brush(position: Vector2) -> PoolVector2Array:
+	var result := PoolVector2Array()
+	var brush_mask := BitMap.new()
+	var pos = position - (_indicator.get_size() / 2).floor()
+	brush_mask.create_from_image_alpha(_brush_image, 0.0)
+	for x in brush_mask.get_size().x:
+		for y in brush_mask.get_size().y:
+			if !_draw_points.has(Vector2(x, y)):
+				if brush_mask.get_bit(Vector2(x, y)):
+					result.append(pos + Vector2(x, y))
+	return result

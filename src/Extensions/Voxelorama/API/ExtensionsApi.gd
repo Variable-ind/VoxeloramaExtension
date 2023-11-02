@@ -8,14 +8,16 @@ var dialog := DialogAPI.new()
 var panel := PanelAPI.new()
 var theme := ThemeAPI.new()
 var tools := ToolAPI.new()
+var selection := SelectionAPI.new()
 var project := ProjectAPI.new()
+var exports := ExportAPI.new()
 var signals := SignalsAPI.new()
 
 
 # The Api Methods Start Here
 func get_api_version() -> int:
 	# Returns the api version of pixelorama
-	return 2
+	return 3
 
 
 class GeneralAPI:
@@ -31,6 +33,22 @@ class GeneralAPI:
 	# Nodes
 	func get_global():
 		# Returns the Global autoload used by pixelorama
+		# (Global contains references to the important UI elements along with some global properties)
+		pass
+
+	func get_drawing_algos():
+		# returns the DrawingAlgos autoload used by pixelorama
+		pass
+
+	func get_shader_image_effect():
+		# gices you a new ShaderImageEffect class. this class can apply shader to an image
+		# it has contains a method
+		# generate_image(img: Image, shader: Shader, params: Dictionary, size: Vector2)
+		## PARAMETERS
+		## img --> image that the shader will be pasted to (Empty Image of size same as project)
+		## shader --> preload of the shader
+		## params --> a dictionary of params used by the shader
+		## size --> It is the project's size
 		pass
 
 	func get_extensions_node() -> Node:
@@ -132,24 +150,118 @@ class ToolAPI:
 		pass
 
 
-class ProjectAPI:
-	func get_current_project():
-		# Returns the current project (type: Project)
+class SelectionAPI:
+	func clear_selection() -> void:
 		pass
 
-	func get_current_cel_info() -> Dictionary:
-		# As there are more than one types of cel in Pixelorama,
-		# An extension may try to use a GroupCel as a PixelCel (if it doesn't know the difference)
-		# So it's encouraged to use this function to access cels
+	func select_all() -> void:
+		pass
 
+	func select_rect(select_rect: Rect2, operation := 0) -> void:
+		# 0 for adding, 1 for subtracting, 2 for intersection
+		pass
+
+	func move_selection(destination: Vector2, with_content := true, transform_standby := false):
+		# (transform_standby = true) then the transformation will not be applied immediately
+		# unless "Enter" is pressed
+		pass
+
+	func resize_selection(new_size: Vector2, with_content := true, transform_standby := false):
+		# (transform_standby = true) then the transformation will not be applied immediately
+		# unless "Enter" is pressed
+		pass
+
+	func invert() -> void:
+		pass
+
+	func make_brush() -> void:
+		pass
+
+	func copy() -> void:
+		pass
+
+	func paste(in_place := false) -> void:
+		pass
+
+	func delete_content() -> void:
+		pass
+
+
+class ProjectAPI:
+	func new_project(
+		frames := [],
+		name := tr("untitled"),
+		size := Vector2(64, 64),
+		fill_color := Color.transparent
+	) -> Project:
+		# Will Create a new project (as tab) based on the given data
+		# and also return itself
+		return null
+
+	func switch_to(project: Project):
+		# Switches to the tab that contains the "project"
+		pass
+
+	func get_current_project() -> Project:
+		# Returns the current project (type: Project)
+		return null
+
+	func get_project_info(project) -> Dictionary:
+		# Returns dictionary containing all the project information
+		return {}
+
+	func get_current_cel() -> BaseCel:
+		# returns the current cel
+		# cel type can be checked using method (get_class_name)
 		# type can be "GroupCel", "PixelCel", "Cel3D", and "BaseCel"
-		return {"cel": null, "type": ""}
+		return null
 
-	func get_cel_info_at(project, frame: int, layer: int) -> Dictionary:
+	func get_cel_at(project, frame: int, layer: int) -> BaseCel:
 		# frames from left to right, layers from bottom to top
 		# frames/layers start at "0"
 		# and end at (project.frames.size() - 1) and (project.layers.size() - 1) respectively
-		return {"cel": null, "type": ""}
+		return null
+
+	func set_pixelcel_image(image: Image, frame: int, layer: int):
+		# target project will be the current project
+		# frames from left to right, layers from bottom to top
+		pass
+
+	func add_new_frame(after_frame: int):
+		# Adds a new frame in the "current project"
+		pass
+
+	func add_new_layer(above_layer: int, name := "", type := 0):
+		# Adds a new Layer in the "current project"
+
+		# type = 0 --> PixelLayer, type = 1 --> GroupLayer, type = 2 --> 3DLayer
+		# above_layer = 0 is the bottom-most layer and so on
+		pass
+
+
+class ExportAPI:
+	enum ExportTab { IMAGE = 0, SPRITESHEET = 1}
+
+	func add_export_option(
+		format_info: Dictionary, exporter_generator, tab := ExportTab.IMAGE, is_animated := true
+	) -> int:
+		# PARAMETERS:
+		# format_info has keys "extension" and "description" whose values are of type String
+		# FOR EXAMPLE
+			# format_info = {"extension": ".gif", "description": "GIF Image"}
+
+		# exporter_generator is the node containing a script which has method (override_export)
+		# which has 1 argument of type Dictionary which has keys
+		# "processed_images", "durations", "export_dialog", "export_paths", "project"
+
+		# if the value of tab is not in ExportTab then the format will be added to both
+
+		# returns the index of exporter. use this in (remove_export_option)
+		return 0
+
+	func remove_export_option(id: int):
+		# Removes the exporter from Pixelorama
+		pass
 
 
 class SignalsAPI:

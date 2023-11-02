@@ -8,6 +8,148 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Reference",
+"class": "AnimationTag",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/AnimationTag.gd"
+}, {
+"base": "Reference",
+"class": "BaseCel",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/BaseCel.gd"
+}, {
+"base": "Reference",
+"class": "BaseLayer",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/BaseLayer.gd"
+}, {
+"base": "VBoxContainer",
+"class": "BaseTool",
+"language": "GDScript",
+"path": "res://src/Tools/BaseTool.gd"
+}, {
+"base": "Popup",
+"class": "Brushes",
+"language": "GDScript",
+"path": "res://src/UI/Buttons/BrushesPopup.gd"
+}, {
+"base": "BaseCel",
+"class": "Cel3D",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Cel3D.gd"
+}, {
+"base": "Spatial",
+"class": "Cel3DObject",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Cel3DObject.gd"
+}, {
+"base": "Reference",
+"class": "Drawer",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Drawers.gd"
+}, {
+"base": "Reference",
+"class": "Frame",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Frame.gd"
+}, {
+"base": "Reference",
+"class": "GIFAnimationExporter",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/GIFAnimationExporter.gd"
+}, {
+"base": "BaseCel",
+"class": "GroupCel",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/GroupCel.gd"
+}, {
+"base": "BaseLayer",
+"class": "GroupLayer",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/GroupLayer.gd"
+}, {
+"base": "ConfirmationDialog",
+"class": "ImageEffect",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/ImageEffect.gd"
+}, {
+"base": "BaseLayer",
+"class": "Layer3D",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Layer3D.gd"
+}, {
+"base": "Reference",
+"class": "ObjParse",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/ObjParse.gd"
+}, {
+"base": "BaseCel",
+"class": "PixelCel",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/PixelCel.gd"
+}, {
+"base": "BaseLayer",
+"class": "PixelLayer",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/PixelLayer.gd"
+}, {
+"base": "Reference",
+"class": "Project",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Project.gd"
+}, {
+"base": "Image",
+"class": "SelectionMap",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/SelectionMap.gd"
+}, {
+"base": "BaseTool",
+"class": "SelectionTool",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/SelectionTool.gd"
+}, {
+"base": "Reference",
+"class": "ShaderImageEffect",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/ShaderImageEffect.gd"
+}, {
+"base": "Reference",
+"class": "Tiles",
+"language": "GDScript",
+"path": "res://src/Extensions/Voxelorama/API/EmptyClasses/Tiles.gd"
+}, {
+"base": "TextureProgress",
+"class": "ValueSlider",
+"language": "GDScript",
+"path": "res://src/UI/Nodes/ValueSlider.gd"
+} ]
+_global_script_class_icons={
+"AnimationTag": "",
+"BaseCel": "",
+"BaseLayer": "",
+"BaseTool": "",
+"Brushes": "",
+"Cel3D": "",
+"Cel3DObject": "",
+"Drawer": "",
+"Frame": "",
+"GIFAnimationExporter": "",
+"GroupCel": "",
+"GroupLayer": "",
+"ImageEffect": "",
+"Layer3D": "",
+"ObjParse": "",
+"PixelCel": "",
+"PixelLayer": "",
+"Project": "",
+"SelectionMap": "",
+"SelectionTool": "",
+"ShaderImageEffect": "",
+"Tiles": "",
+"ValueSlider": ""
+}
+
 [application]
 
 config/name="Voxelorama"
@@ -19,7 +161,7 @@ driver="Dummy"
 
 [autoload]
 
-ExtensionsApi="*res://src/Extensions/Voxelorama/ExtensionsApi.gd"
+ExtensionsApi="*res://src/Extensions/Voxelorama/API/ExtensionsApi.gd"
 
 [input]
 
