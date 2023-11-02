@@ -51,3 +51,7 @@ func _compute_draw_tool_pixel(position: Vector2) -> PoolVector2Array:
 
 func _compute_draw_tool_circle(position: Vector2, fill := false) -> PoolVector2Array:
 	return PoolVector2Array()
+
+
+func prepare_undo(action: String) -> void:
+	pass

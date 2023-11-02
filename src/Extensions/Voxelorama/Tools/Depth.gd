@@ -1,5 +1,6 @@
 extends "res://src/Tools/Draw.gd"
 
+var _last_position := Vector2.INF
 
 var _depth_array := []  # 2D array
 var _depth := 1.0
@@ -8,6 +9,7 @@ var _canvas_depth_node: Node2D
 
 var _canvas: Node2D
 var _draw_points := []
+
 
 func _ready() -> void:
 	kname = name.replace(" ", "_").to_lower()
@@ -66,6 +68,7 @@ func draw_start(position: Vector2) -> void:
 	else:
 		_initialize_array(image)
 	_update_array(cel, position)
+	_last_position = position
 
 
 func draw_move(position: Vector2) -> void:
@@ -75,7 +78,8 @@ func draw_move(position: Vector2) -> void:
 		draw_start(position)
 	var project = ExtensionsApi.project.get_current_project()
 	var cel = project.frames[project.current_frame].cels[project.current_layer]
-	_update_array(cel, position)
+	fill_gap(cel, _last_position, position)
+	_last_position = position
 
 
 func draw_end(position: Vector2) -> void:
@@ -87,18 +91,6 @@ func draw_end(position: Vector2) -> void:
 
 func cursor_move(position: Vector2) -> void:
 	_cursor = position
-
-
-#func draw_indicator(left: bool) -> void:
-#	var rect := Rect2(_cursor, Vector2.ONE)
-#	if _canvas:
-#		var global: Node = ExtensionsApi.general.get_global()
-#		var color: Color = global.left_tool_color if left else global.right_tool_color
-#		_canvas.indicators.draw_rect(rect, color, false)
-
-
-func draw_preview() -> void:
-	pass
 
 
 func _initialize_array(image: Image) -> void:
@@ -147,6 +139,7 @@ func _draw_tool(position: Vector2) -> PoolVector2Array:
 			return _compute_draw_tool_brush(position)
 
 
+# helper methods
 func _compute_draw_tool_brush(position: Vector2) -> PoolVector2Array:
 	var result := PoolVector2Array()
 	var brush_mask := BitMap.new()
@@ -158,3 +151,25 @@ func _compute_draw_tool_brush(position: Vector2) -> PoolVector2Array:
 				if brush_mask.get_bit(Vector2(x, y)):
 					result.append(pos + Vector2(x, y))
 	return result
+
+
+# Bresenham's Algorithm
+# Thanks to https://godotengine.org/qa/35276/tile-based-line-drawing-algorithm-efficiency
+func fill_gap(cel, start: Vector2, end: Vector2) -> void:
+	var dx := int(abs(end.x - start.x))
+	var dy := int(-abs(end.y - start.y))
+	var err := dx + dy
+	var e2 := err << 1
+	var sx = 1 if start.x < end.x else -1
+	var sy = 1 if start.y < end.y else -1
+	var x = start.x
+	var y = start.y
+	while !(x == end.x && y == end.y):
+		e2 = err << 1
+		if e2 >= dy:
+			err += dy
+			x += sx
+		if e2 <= dx:
+			err += dx
+			y += sy
+		_update_array(cel, Vector2(x, y))

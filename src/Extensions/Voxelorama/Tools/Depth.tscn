@@ -18,4 +18,13 @@ value = 1.0
 allow_greater = true
 prefix = "Depth:"
 
+[node name="Label2" type="Label" parent="." index="5"]
+margin_top = 90.0
+margin_right = 116.0
+margin_bottom = 155.0
+size_flags_vertical = 6
+text = "Please note that Undo/Redo will not work for this tool"
+align = 1
+autowrap = true
+
 [connection signal="value_changed" from="Depth" to="." method="_on_Depth_value_changed"]
