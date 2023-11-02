@@ -10,6 +10,8 @@ var _canvas_depth_node: Node2D
 var _canvas: Node2D
 var _draw_points := []
 
+var _fill_inside = false
+
 
 func _ready() -> void:
 	kname = name.replace(" ", "_").to_lower()
@@ -38,21 +40,28 @@ func load_config() -> void:
 
 
 func get_config() -> Dictionary:
-	return {"depth": _depth}
+	var config: Dictionary = .get_config()
+	config["depth"] = _depth
+	config["fill_inside"] = _fill_inside
+	return config
 
 
 func set_config(config: Dictionary) -> void:
+	.set_config(config)
 	_depth = config.get("depth", _depth)
+	_fill_inside = config.get("fill_inside", _fill_inside)
 
 
 func update_config() -> void:
 	.update_config()
 	$Depth.value = _depth
+	$FillInside.pressed = _fill_inside
 
 
 func draw_start(position: Vector2) -> void:
 	is_moving = true
 	_depth_array = []
+	_draw_points = Array()
 	var project = ExtensionsApi.project.get_current_project()
 	var cel: Reference = project.frames[project.current_frame].cels[project.current_layer]
 	var image: Image = cel.image
@@ -67,8 +76,17 @@ func draw_start(position: Vector2) -> void:
 			_initialize_array(image)
 	else:
 		_initialize_array(image)
-	_update_array(cel, position)
-	_last_position = position
+	_draw_line = Input.is_action_pressed("draw_create_line")
+	if _draw_line:
+		_line_start = position
+		_line_end = position
+		update_line_polylines(_line_start, _line_end)
+	else:
+		if _fill_inside:
+			_draw_points.append(position)
+		_update_array(cel, position)
+		_last_position = position
+	cursor_text = ""
 
 
 func draw_move(position: Vector2) -> void:
@@ -78,15 +96,40 @@ func draw_move(position: Vector2) -> void:
 		draw_start(position)
 	var project = ExtensionsApi.project.get_current_project()
 	var cel = project.frames[project.current_frame].cels[project.current_layer]
-	fill_gap(cel, _last_position, position)
-	_last_position = position
+	if _draw_line:
+		var d := _line_angle_constraint(_line_start, position)
+		_line_end = d.position
+		cursor_text = d.text
+		update_line_polylines(_line_start, _line_end)
+	else:
+		fill_gap(cel, _last_position, position)
+		_last_position = position
+		cursor_text = ""
+		if _fill_inside:
+			_draw_points.append(position)
 
 
 func draw_end(position: Vector2) -> void:
 	is_moving = false
 	var project = ExtensionsApi.project.get_current_project()
 	var cel = project.frames[project.current_frame].cels[project.current_layer]
-	_update_array(cel, position)
+	if _draw_line:
+		_update_array(cel, position)
+		fill_gap(cel, _line_start, _line_end)
+		_draw_line = false
+	else:
+		if _fill_inside:
+			_draw_points.append(position)
+			if _draw_points.size() > 3:
+				var v = Vector2()
+				var map_size = ExtensionsApi.project.get_current_project().size
+				for x in map_size.x:
+					v.x = x
+					for y in map_size.y:
+						v.y = y
+						if Geometry.is_point_in_polygon(v, _draw_points):
+							_update_array(cel, v)
+	cursor_text = ""
 
 
 func cursor_move(position: Vector2) -> void:
@@ -116,6 +159,12 @@ func _on_Depth_value_changed(value: float) -> void:
 	save_config()
 
 
+func _on_FillInside_toggled(button_pressed: bool) -> void:
+	_fill_inside = button_pressed
+	update_config()
+	save_config()
+
+
 func _exit_tree() -> void:
 	if _canvas:
 		_canvas_depth_node.request_deletion()
@@ -127,7 +176,6 @@ func _exit_tree() -> void:
 # Make sure to always have invoked _prepare_tool() before this. This computes the coordinates to be
 # drawn if it can (except for the generic brush, when it's actually drawing them)
 func _draw_tool(position: Vector2) -> PoolVector2Array:
-	_draw_points.clear()
 	match _brush.type:
 		Brushes.PIXEL:
 			return _compute_draw_tool_pixel(position)

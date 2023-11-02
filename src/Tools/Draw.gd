@@ -55,3 +55,11 @@ func _compute_draw_tool_circle(position: Vector2, fill := false) -> PoolVector2A
 
 func prepare_undo(action: String) -> void:
 	pass
+
+
+func update_line_polylines(start: Vector2, end: Vector2) -> void:
+	pass
+
+
+func _line_angle_constraint(start: Vector2, end: Vector2) -> Dictionary:
+	return {}

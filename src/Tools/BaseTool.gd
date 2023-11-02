@@ -23,3 +23,7 @@ onready var color_rect: ColorRect = $ColorRect
 
 func draw_preview() -> void:
 	pass
+
+
+func snap_position(position: Vector2) -> Vector2:
+	return Vector2.ZERO
